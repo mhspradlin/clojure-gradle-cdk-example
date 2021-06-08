@@ -1,0 +1,58 @@
+plugins {
+  id 'base'
+}
+
+configurations {
+  // Input: The directory that has the Dockerfile and all other
+  // artifacts needed at image build time
+  finchServerDockerDir
+  // Input: The directory that has the staged UI assets
+  finchUIAssetsDir
+}
+
+task synthesize {
+  description "Builds CloudFormation templates without deploying them"
+  inputs.files(fileTree('lib'))
+  inputs.files(configurations.finchServerDockerDir)
+  outputs.files(fileTree('cdk.out'))
+  doLast {
+    exec {
+      workingDir '.'
+      commandLine 'cdk', 'synth',
+        '--context',
+        "server-docker-dir=${configurations.finchServerDockerDir.resolve()[0].absolutePath}",
+        '--context',
+        "ui-assets-dir=${configurations.finchUIAssetsDir.resolve()[0].absolutePath}"
+    }
+  }
+}
+synthesize.dependsOn(configurations.finchServerDockerDir)
+synthesize.dependsOn(configurations.finchUIAssetsDir)
+assemble.dependsOn(synthesize)
+
+task deploy {
+  description """Synthesizes and deploys AWS resources.
+    Bypasses approvals for security-related changes."""
+  inputs.files(configurations.finchServerDockerDir)
+  doLast {
+    exec {
+      workingDir '.'
+      // Deploy also synthesizes, regardless of if we've already done a synthesis
+      commandLine 'cdk', 'deploy', '--all',
+        '--require-approval', 'never',
+        '--context',
+        "server-docker-dir=${configurations.finchServerDockerDir.resolve()[0].absolutePath}",
+        '--context',
+        "ui-assets-dir=${configurations.finchUIAssetsDir.resolve()[0].absolutePath}"
+    }
+  }
+}
+deploy.dependsOn(configurations.finchServerDockerDir)
+deploy.dependsOn(configurations.finchUIAssetsDir)
+
+dependencies {
+  // Configures finchServerDockerDir to come from the packaging subproject
+  finchServerDockerDir project(path: ':packaging', configuration: 'finchServerDockerDir')
+  // Configures finchUIAssetsDir to come from the finch-ui subproject
+  finchUIAssetsDir project(path: ':finch-ui', configuration: 'assets')
+}

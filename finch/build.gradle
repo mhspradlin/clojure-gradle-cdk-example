@@ -1,0 +1,28 @@
+plugins {
+  id 'base'
+}
+
+configurations {
+  // This represents the output of this project,
+  // which the packaging project can consume
+  uberjar
+}
+
+task buildUberjar(type: Exec) {
+  inputs.files(fileTree('src'))
+  outputs.file(layout.buildDirectory.file('target/finch.jar'))
+  commandLine 'clj', '-X:uberjar',
+    ':jar',
+    // Extra string wrapping is because this needs to end up as a Clojure string literal
+    "\"${file("$buildDir/target/finch.jar").getAbsolutePath()}\""
+}
+assemble.dependsOn(buildUberjar)
+
+dependencies {
+  // Sets the uberjar configuration  to depends
+  // on the output of the buildUberjar task
+  // This is necessary so upstream consumers
+  // like the packaging project will rebuild
+  // if the source files change
+  uberjar files(buildUberjar)
+}

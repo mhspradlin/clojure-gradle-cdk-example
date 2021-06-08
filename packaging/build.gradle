@@ -1,0 +1,58 @@
+plugins {
+  id 'base'
+}
+
+configurations {
+  // Input: The uberjar for the server that will be run in Docker
+  finchServerUberjar
+  // Output: The directory that has the Dockerfile and all other
+  // artifacts needed at image build time
+  finchServerDockerDir
+}
+
+task stageFinchServer(type: Copy) {
+  description """Copies the uberjar and everything in finch-server into\
+  an output directory
+  """
+  from "$projectDir/finch-server"
+  from configurations.finchServerUberjar
+  into "$buildDir/target/finch-server"
+}
+assemble.dependsOn(stageFinchServer)
+
+task buildFinchDockerImage(type: Exec) {
+  description """Builds the finch-server docker image and uploads it
+  to the local docker daemon. Intended for manual testing and debugging
+  of the Dockerfile since the CDK manages building the image and uploading
+  to ECR as a part of deployment."""
+  workingDir "$buildDir/target/finch-server"
+  commandLine 'docker', 'build', '.',
+    '-t', 'applicative-finch/test-builds:latest',
+    '--label', 'finch-server-test-build'
+}
+buildFinchDockerImage.dependsOn(stageFinchServer)
+check.dependsOn(buildFinchDockerImage)
+
+task cleanTestDockerImages(type: Exec) {
+  description """Removes all docker images uploaded to the registry as a part of testing."""
+  String[] testImages = 'docker images -f label=finch-server-test-build --format {{.ID}}'.execute().text.split("\n").findAll { it.size() > 0 }
+  String[] removeImageCommand = ['docker', 'rmi']
+  commandLine (testImages.length > 0 ? removeImageCommand + testImages : ['echo', 'No images to clean'])
+}
+clean.dependsOn(cleanTestDockerImages)
+
+task runFinchServer(type: Exec) {
+  description """Runs the test docker image built from buildFinchDockerImage.
+  Intended for testing the Dockerfile."""
+  commandLine 'docker', 'run', 'applicative-finch/test-builds:latest'
+}
+runFinchServer.dependsOn(buildFinchDockerImage)
+
+dependencies {
+  // Configures finchServerUberjar to come from the finch subproject
+  finchServerUberjar project(path: ':finch', configuration: 'uberjar')
+  // Sets the finchServerDockerDir outputs to depend on
+  // the output of the stageFinchServer task, so downstream
+  // tasks will rebuild if stageFinchServer must rebuild
+  finchServerDockerDir files(stageFinchServer)
+}

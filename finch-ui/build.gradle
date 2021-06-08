@@ -1,0 +1,49 @@
+plugins {
+  id 'base'
+}
+
+configurations {
+  // Output: HTML, JS, CSS, and other assets in a structure ready
+  // to be served as a static site
+  assets
+}
+
+task bundleJs(type: Exec) {
+  inputs.files(fileTree('src'))
+  outputs.dir(layout.projectDirectory.dir("target/public"))
+
+  commandLine 'clj', '-A:fig', '-M',
+    '-m', 'figwheel.main',
+    '-O', 'advanced',
+    '-bo', 'dev'
+}
+
+task copyAssets(type: Copy) {
+  description "Copy the bundled JS and the public resources into the build directory"
+  from (layout.projectDirectory.dir('target/public')) {
+    include 'cljs-out/dev/main_bundle.js' // Only include the final bundle
+  }
+  from (layout.projectDirectory.dir('resources/public')) {
+    exclude 'test.html' // Ignore test HTML file
+  }
+  into layout.buildDirectory.dir('target')
+}
+copyAssets.dependsOn(bundleJs)
+assemble.dependsOn(copyAssets)
+
+task serveAssets(type: Exec) {
+  description """Meant for testing the build script. Serves assets from the build directory.
+  For development, use Figwheel's built-in dev server with hot reloading."""
+  workingDir layout.buildDirectory.dir('target')
+  commandLine 'npx', 'http-server'
+}
+serveAssets.dependsOn(copyAssets)
+
+dependencies {
+  // Sets the assets configuration to depend
+  // on the output of the copyAssets task
+  // This is necessary so upstream consumers
+  // like the packaging project will rebuild
+  // if the source files change
+  assets files(copyAssets)
+}

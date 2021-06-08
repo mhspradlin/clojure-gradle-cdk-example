@@ -1,12 +1,17 @@
 (ns com.applicative.finch
-  (:gen-class))
+  (:gen-class)
+  (:require [ring.adapter.jetty :refer [run-jetty]]
+            [clojure.tools.logging :refer [infof]]))
 
-(defn greet
-  "Callable entry point to the application."
-  [data]
-  (println (str "Hello, " (or (:name data) "World") "!")))
+(defn handler [request]
+  (infof "Got request: %s" request)
+  {:status 200
+   :headers {"Content-Type" "text/plain"}
+   :body "Hello World"})
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (greet {:name (first args)}))
+  (run-jetty handler {:port 3000})) 
+
+(comment
+  (-main))

@@ -1,5 +1,8 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.10.3"}}
+ :deps {org.clojure/clojure {:mvn/version "1.10.3"}
+        ring/ring-core {:mvn/version "1.9.3"}
+        ring/ring-jetty-adapter {:mvn/version "1.9.3"}
+        org.clojure/tools.logging {:mvn/version "1.1.0"}}
  :aliases
  {:run-m {:main-opts ["-m" "com.applicative.finch"]}
   :run-x {:ns-default com.applicative.finch
