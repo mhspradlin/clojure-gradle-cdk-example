@@ -1,4 +1,4 @@
-(ns com.applicative.finch-ui-test
+(ns mhspradlin.app-ui-test
     (:require
      [cljs.test :refer-macros [deftest is testing]]))
 

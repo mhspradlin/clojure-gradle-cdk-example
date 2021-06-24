@@ -13,7 +13,7 @@ export class AppUI extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: AppUIProps) {
     super(scope, id, props);
 
-    new BucketDeployment(this, 'FinchUI', {
+    new BucketDeployment(this, 'AppUI', {
       sources: [Source.asset(this.node.tryGetContext("ui-assets-dir"))],
       destinationBucket: props.bucket,
       distribution: props.distribution

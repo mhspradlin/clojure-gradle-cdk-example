@@ -2,7 +2,7 @@
 (ns com.test-runner
   (:require
     ;; require all the namespaces that you want to test
-    [com.applicative.finch-ui-test]
+    [mhspradlin.app-ui-test]
     [figwheel.main.testing :refer [run-tests-async]]))
 
 (defn -main [& args]

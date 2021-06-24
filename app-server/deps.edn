@@ -4,8 +4,8 @@
         ring/ring-jetty-adapter {:mvn/version "1.9.3"}
         org.clojure/tools.logging {:mvn/version "1.1.0"}}
  :aliases
- {:run-m {:main-opts ["-m" "com.applicative.finch"]}
-  :run-x {:ns-default com.applicative.finch
+ {:run-m {:main-opts ["-m" "mhspradlin.clojure-cdk-gradle-example"]}
+  :run-x {:ns-default mhspradlin.app-server
           :exec-fn greet
           :exec-args {:name "Clojure"}}
   :test {:extra-paths ["test"]
@@ -19,6 +19,6 @@
   :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.211"}}
             :exec-fn hf.depstar/uberjar
             :exec-args {:aot true
-                        :jar "finch.jar"
-                        :main-class "com.applicative.finch"
+                        :jar "app-server.jar"
+                        :main-class "mhspradlin.app-server"
                         :sync-pom true}}}}

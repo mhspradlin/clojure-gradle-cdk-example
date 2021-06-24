@@ -5,35 +5,35 @@ plugins {
 configurations {
   // Input: The directory that has the Dockerfile and all other
   // artifacts needed at image build time
-  finchServerDockerDir
+  appServerDockerDir
   // Input: The directory that has the staged UI assets
-  finchUIAssetsDir
+  appUIAssetsDir
 }
 
 task synthesize {
   description "Builds CloudFormation templates without deploying them"
   inputs.files(fileTree('lib'))
-  inputs.files(configurations.finchServerDockerDir)
+  inputs.files(configurations.appServerDockerDir)
   outputs.files(fileTree('cdk.out'))
   doLast {
     exec {
       workingDir '.'
       commandLine 'cdk', 'synth',
         '--context',
-        "server-docker-dir=${configurations.finchServerDockerDir.resolve()[0].absolutePath}",
+        "server-docker-dir=${configurations.appServerDockerDir.resolve()[0].absolutePath}",
         '--context',
-        "ui-assets-dir=${configurations.finchUIAssetsDir.resolve()[0].absolutePath}"
+        "ui-assets-dir=${configurations.appUIAssetsDir.resolve()[0].absolutePath}"
     }
   }
 }
-synthesize.dependsOn(configurations.finchServerDockerDir)
-synthesize.dependsOn(configurations.finchUIAssetsDir)
+synthesize.dependsOn(configurations.appServerDockerDir)
+synthesize.dependsOn(configurations.appUIAssetsDir)
 assemble.dependsOn(synthesize)
 
 task deploy {
   description """Synthesizes and deploys AWS resources.
     Bypasses approvals for security-related changes."""
-  inputs.files(configurations.finchServerDockerDir)
+  inputs.files(configurations.appServerDockerDir)
   doLast {
     exec {
       workingDir '.'
@@ -41,18 +41,18 @@ task deploy {
       commandLine 'cdk', 'deploy', '--all',
         '--require-approval', 'never',
         '--context',
-        "server-docker-dir=${configurations.finchServerDockerDir.resolve()[0].absolutePath}",
+        "server-docker-dir=${configurations.appServerDockerDir.resolve()[0].absolutePath}",
         '--context',
-        "ui-assets-dir=${configurations.finchUIAssetsDir.resolve()[0].absolutePath}"
+        "ui-assets-dir=${configurations.appUIAssetsDir.resolve()[0].absolutePath}"
     }
   }
 }
-deploy.dependsOn(configurations.finchServerDockerDir)
-deploy.dependsOn(configurations.finchUIAssetsDir)
+deploy.dependsOn(configurations.appServerDockerDir)
+deploy.dependsOn(configurations.appUIAssetsDir)
 
 dependencies {
-  // Configures finchServerDockerDir to come from the packaging subproject
-  finchServerDockerDir project(path: ':packaging', configuration: 'finchServerDockerDir')
-  // Configures finchUIAssetsDir to come from the finch-ui subproject
-  finchUIAssetsDir project(path: ':finch-ui', configuration: 'assets')
+  // Configures appServerDockerDir to come from the packaging subproject
+  appServerDockerDir project(path: ':packaging', configuration: 'appServerDockerDir')
+  // Configures appUIAssetsDir to come from the app-ui subproject
+  appUIAssetsDir project(path: ':app-ui', configuration: 'assets')
 }

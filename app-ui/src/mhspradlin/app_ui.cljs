@@ -1,10 +1,10 @@
-(ns ^:figwheel-hooks com.applicative.finch-ui
+(ns ^:figwheel-hooks mhspradlin.app-ui
   (:require
    [goog.dom :as gdom]
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]))
 
-(println "This text is printed from src/com/applicative/finch_ui.cljs. Go ahead and edit it and see reloading in action.")
+(println "This text is printed from src/com/mhspradlin/app_ui.cljs. Go ahead and edit it and see reloading in action.")
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:text "<not yet loaded>"}))

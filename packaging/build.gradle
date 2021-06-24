@@ -4,55 +4,55 @@ plugins {
 
 configurations {
   // Input: The uberjar for the server that will be run in Docker
-  finchServerUberjar
+  appServerUberjar
   // Output: The directory that has the Dockerfile and all other
   // artifacts needed at image build time
-  finchServerDockerDir
+  appServerDockerDir
 }
 
-task stageFinchServer(type: Copy) {
-  description """Copies the uberjar and everything in finch-server into\
+task stageAppServer(type: Copy) {
+  description """Copies the uberjar and everything in app-server into\
   an output directory
   """
-  from "$projectDir/finch-server"
-  from configurations.finchServerUberjar
-  into "$buildDir/target/finch-server"
+  from "$projectDir/app-server"
+  from configurations.appServerUberjar
+  into "$buildDir/target/app-server"
 }
-assemble.dependsOn(stageFinchServer)
+assemble.dependsOn(stageAppServer)
 
-task buildFinchDockerImage(type: Exec) {
-  description """Builds the finch-server docker image and uploads it
+task buildAppDockerImage(type: Exec) {
+  description """Builds the app-server docker image and uploads it
   to the local docker daemon. Intended for manual testing and debugging
   of the Dockerfile since the CDK manages building the image and uploading
   to ECR as a part of deployment."""
-  workingDir "$buildDir/target/finch-server"
+  workingDir "$buildDir/target/app-server"
   commandLine 'docker', 'build', '.',
-    '-t', 'applicative-finch/test-builds:latest',
-    '--label', 'finch-server-test-build'
+    '-t', 'mhspradlin/test-builds:latest',
+    '--label', 'app-server-test-build'
 }
-buildFinchDockerImage.dependsOn(stageFinchServer)
-check.dependsOn(buildFinchDockerImage)
+buildAppDockerImage.dependsOn(stageAppServer)
+check.dependsOn(buildAppDockerImage)
 
 task cleanTestDockerImages(type: Exec) {
   description """Removes all docker images uploaded to the registry as a part of testing."""
-  String[] testImages = 'docker images -f label=finch-server-test-build --format {{.ID}}'.execute().text.split("\n").findAll { it.size() > 0 }
+  String[] testImages = 'docker images -f label=app-server-test-build --format {{.ID}}'.execute().text.split("\n").findAll { it.size() > 0 }
   String[] removeImageCommand = ['docker', 'rmi']
   commandLine (testImages.length > 0 ? removeImageCommand + testImages : ['echo', 'No images to clean'])
 }
 clean.dependsOn(cleanTestDockerImages)
 
-task runFinchServer(type: Exec) {
-  description """Runs the test docker image built from buildFinchDockerImage.
+task runAppServer(type: Exec) {
+  description """Runs the test docker image built from buildAppDockerImage.
   Intended for testing the Dockerfile."""
-  commandLine 'docker', 'run', 'applicative-finch/test-builds:latest'
+  commandLine 'docker', 'run', 'mhspradlin/test-builds:latest'
 }
-runFinchServer.dependsOn(buildFinchDockerImage)
+runAppServer.dependsOn(buildAppDockerImage)
 
 dependencies {
-  // Configures finchServerUberjar to come from the finch subproject
-  finchServerUberjar project(path: ':finch', configuration: 'uberjar')
-  // Sets the finchServerDockerDir outputs to depend on
-  // the output of the stageFinchServer task, so downstream
-  // tasks will rebuild if stageFinchServer must rebuild
-  finchServerDockerDir files(stageFinchServer)
+  // Configures appServerUberjar to come from the app subproject
+  appServerUberjar project(path: ':app-server', configuration: 'uberjar')
+  // Sets the appServerDockerDir outputs to depend on
+  // the output of the stageAppServer task, so downstream
+  // tasks will rebuild if stageAppServer must rebuild
+  appServerDockerDir files(stageAppServer)
 }

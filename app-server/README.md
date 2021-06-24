@@ -1,10 +1,10 @@
-# finch
+# clojure-cdk-gradle-example
 
 FIXME: my new application.
 
 ## Installation
 
-Download from https://github.com/com.applicative/finch
+Download from https://github.com/mhspradlin/clojure-cdk-gradle-example
 
 ## Usage
 
@@ -20,7 +20,7 @@ Run the project, overriding the name to be greeted:
     $ clojure -X:run-x :name '"Someone"'
     Hello, Someone!
 
-Run the project directly, via `:main-opts` (`-m com.applicative.finch`):
+Run the project directly, via `:main-opts` (`-m mhspradlin.clojure-cdk-gradle-example`):
 
     $ clojure -M:run-m
     Hello, World!
@@ -49,7 +49,7 @@ also need to remove `:sync-pom true` from the `deps.edn` file (in the `:exec-arg
 
 Run that uberjar:
 
-    $ java -jar finch.jar
+    $ java -jar app-server.jar
 
 ## Options
 

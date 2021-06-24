@@ -1,4 +1,4 @@
-(ns com.applicative.finch
+(ns mhspradlin.app-server
   (:gen-class)
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [clojure.tools.logging :refer [infof]]))

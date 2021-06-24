@@ -17,27 +17,27 @@ const appVpc = new AppVpc(app, 'AppVpc', {
   env
 });
 
-const appCluster = new AppCluster(app, 'FinchCluster-Prod', {
+const appCluster = new AppCluster(app, 'AppCluster-Prod', {
   env,
   vpc: appVpc.vpc
 });
-appCluster.addDependency(appVpc, "FinchCluster requires a VPC to run in");
+appCluster.addDependency(appVpc, "AppCluster requires a VPC to run in");
 
-const appService = new AppService(app, 'FinchService-Prod', {
+const appService = new AppService(app, 'AppService-Prod', {
   env,
   cluster: appCluster.cluster
 });
-appService.addDependency(appService, "FinchService needs a Cluster to run on");
+appService.addDependency(appService, "AppService needs a Cluster to run on");
 
-const appEndpoint = new AppEndpoint(app, 'FinchEndpoint-Prod', {
+const appEndpoint = new AppEndpoint(app, 'AppEndpoint-Prod', {
   env,
-  finchApi: appService.api
+  appApi: appService.api
 });
 appEndpoint.addDependency(appService, "The endpoint needs to reference the API");
 
-const appUI = new AppUI(app, 'FinchUI-Prod', {
+const appUI = new AppUI(app, 'AppUI-Prod', {
   env,
   bucket: appEndpoint.spaBucket,
   distribution: appEndpoint.distribution
 });
-appUI.addDependency(appEndpoint, "FinchUI needs a bucket to deploy to and a Distribution to invalidate");
+appUI.addDependency(appEndpoint, "AppUI needs a bucket to deploy to and a Distribution to invalidate");

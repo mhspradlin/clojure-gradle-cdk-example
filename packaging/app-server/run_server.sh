@@ -9,5 +9,5 @@ pushd /usr/app
 # -XX:+ExitOnOutOfMemoryError - End the program if we run out of memory to cause the container to exit and be restarted
 java \
   -XX:+ExitOnOutOfMemoryError \
-  -jar finch.jar
+  -jar app-server.jar
   

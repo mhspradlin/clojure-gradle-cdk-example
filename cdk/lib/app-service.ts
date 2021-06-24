@@ -16,11 +16,11 @@ export class AppService extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: AppServiceProps) {
     super(scope, id, props);
 
-    const appImageAsset = new DockerImageAsset(this, 'FinchImage', {
+    const appImageAsset = new DockerImageAsset(this, 'AppImage', {
       directory: this.node.tryGetContext("server-docker-dir")
     });
     
-    const fargateService = new ApplicationLoadBalancedFargateService(this, 'FinchService', {
+    const fargateService = new ApplicationLoadBalancedFargateService(this, 'AppService', {
       desiredCount: 1,
       publicLoadBalancer: false,
       cluster: props.cluster,
@@ -30,12 +30,12 @@ export class AppService extends cdk.Stack {
       }
     });
 
-    const vpcLink = new VpcLink(this, 'FinchServiceLink', {
+    const vpcLink = new VpcLink(this, 'AppServiceLink', {
       vpc: fargateService.cluster.vpc
     });
 
-    const apiGateway = new HttpApi(this, 'FinchApiGateway', {
-      description: "API for Finch App",
+    const apiGateway = new HttpApi(this, 'AppApiGateway', {
+      description: "API for App",
     });
     apiGateway.addRoutes({
       path: "/api/hello",
